@@ -1,0 +1,9 @@
+node_modules
+.env
+backend/venv
+backend/data
+.venv
+backend/db.sqlite3
+.next
+actions/__pycache__
+

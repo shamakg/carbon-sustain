@@ -1,18 +1,23 @@
-/**
- * Actions list component for displaying sustainability actions.
- *
- * This component renders a list of sustainability actions with glassmorphism
- * styling, including edit/delete functionality and loading states.
- */
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Edit, Trash2, Calendar, Award, Leaf, MoreVertical } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useState } from "react";
+import {
+  Edit,
+  Trash2,
+  Calendar,
+  Award,
+  Leaf,
+  MoreVertical,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,20 +27,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useToast } from "@/hooks/use-toast"
-import { type SustainabilityAction, deleteAction, formatApiError } from "@/lib/api"
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
+  type SustainabilityAction,
+  deleteAction,
+  formatApiError,
+} from "@/lib/api";
 
 interface ActionsListProps {
-  actions: SustainabilityAction[]
-  isLoading: boolean
-  onEdit: (action: SustainabilityAction) => void
-  onDelete: () => void
+  actions: SustainabilityAction[];
+  isLoading: boolean;
+  onEdit: (action: SustainabilityAction) => void;
+  onDelete: (deletedId: number) => void; // updated to remove deleted action
 }
 
 /**
  * Loading skeleton for individual action items.
- * Displays glassmorphism placeholder content while data loads.
  */
 function ActionItemSkeleton() {
   return (
@@ -58,65 +66,51 @@ function ActionItemSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /**
- * Individual action item component with glassmorphism styling.
+ * Individual action item component with dropdown and delete.
  */
 interface ActionItemProps {
-  action: SustainabilityAction
-  onEdit: (action: SustainabilityAction) => void
-  onDelete: (id: number) => void
+  action: SustainabilityAction;
+  onEdit: (action: SustainabilityAction) => void;
+  onDelete: (id: number) => void;
 }
 
 function ActionItem({ action, onEdit, onDelete }: ActionItemProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  /**
-   * Format date for display in a user-friendly format.
-   */
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
-  /**
-   * Get color scheme based on points value.
-   * Higher points get more vibrant colors.
-   */
   const getPointsColor = (points: number) => {
-    if (points >= 50) return "bg-primary text-primary-foreground"
-    if (points >= 25) return "bg-secondary text-secondary-foreground"
-    return "bg-muted text-muted-foreground"
-  }
+    if (points >= 50) return "bg-primary text-primary-foreground";
+    if (points >= 25) return "bg-secondary text-secondary-foreground";
+    return "bg-muted text-muted-foreground";
+  };
 
-  /**
-   * Handle delete action with confirmation.
-   */
   const handleDelete = () => {
-    setIsDeleting(true)
-    onDelete(action.id!)
-  }
+    onDelete(action.id!);
+  };
 
   return (
     <Card className="backdrop-blur-md bg-card/60 border border-border/20 shadow-lg hover:bg-card/80 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 mb-4 animate-slide-in-up group">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          {/* Action Content */}
+          {/* Action Details */}
           <div className="flex items-center gap-4 flex-1">
-            {/* Action Icon */}
             <div className="p-3 bg-primary/20 rounded-full group-hover:bg-primary/30 transition-colors duration-300">
               <Leaf className="h-6 w-6 text-primary" />
             </div>
-
-            {/* Action Details */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground text-lg mb-1 truncate">{action.action}</h3>
+              <h3 className="font-semibold text-foreground text-lg mb-1 truncate">
+                {action.action}
+              </h3>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -130,37 +124,38 @@ function ActionItem({ action, onEdit, onDelete }: ActionItemProps) {
             </div>
           </div>
 
-          {/* Action Controls */}
+          {/* Points and Dropdown */}
           <div className="flex items-center gap-3">
-            {/* Points Badge */}
-            <Badge className={`${getPointsColor(action.points)} font-bold px-3 py-1`}>+{action.points}</Badge>
+            <Badge
+              className={`${getPointsColor(action.points)} font-bold px-3 py-1`}
+            >
+              +{action.points}
+            </Badge>
 
-            {/* Actions Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 backdrop-blur-md bg-card/60 border border-border/20 hover:bg-card/80 transition-all duration-300 opacity-0 group-hover:opacity-100"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <button className="hover:bg-primary/30 hover:border-primary/50 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:shadow-lg focus:outline-none">
+                  <MoreVertical className="h-4 w-4 text-primary" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="backdrop-blur-md bg-card/80 border border-border/20 shadow-lg"
+                className="backdrop-blur-xl bg-background/95 border-2 border-primary/20 shadow-2xl min-w-[160px] p-1"
+                sideOffset={5}
               >
-                <DropdownMenuItem onClick={() => onEdit(action)} className="cursor-pointer">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Action
+                <DropdownMenuItem
+                  onClick={() => onEdit(action)}
+                  className="cursor-pointer hover:bg-primary/10 focus:bg-primary/10 rounded-md px-3 py-2 transition-colors duration-200"
+                >
+                  <Edit className="h-4 w-4 mr-2 text-primary" />
+                  <span className="font-medium">Edit Action</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDelete}
-                  className="cursor-pointer text-destructive focus:text-destructive"
-                  disabled={isDeleting}
+                  className="cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive rounded-md px-3 py-2 transition-colors duration-200"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {isDeleting ? "Deleting..." : "Delete Action"}
+                  <span className="font-medium">Delete Action</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -168,11 +163,11 @@ function ActionItem({ action, onEdit, onDelete }: ActionItemProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /**
- * Empty state component when no actions are available.
+ * Empty state when no actions exist.
  */
 function EmptyState() {
   return (
@@ -181,74 +176,77 @@ function EmptyState() {
         <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
           <Leaf className="h-12 w-12 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">No Actions Yet</h3>
-        <p className="text-muted-foreground text-balance">
-          Start tracking your sustainability journey by adding your first environmental action.
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          No Actions Yet
+        </h3>
+        <p className="text-muted-foreground text-balance mb-4">
+          Start tracking your sustainability journey by adding your first
+          environmental action.
+        </p>
+        <p className="text-sm text-primary font-medium">
+          Click the "Add New Action" button above to get started!
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 /**
- * Main actions list component with glassmorphism design.
- * Handles loading states, empty states, and action management.
+ * Main actions list with delete/edit.
  */
-export function ActionsList({ actions, isLoading, onEdit, onDelete }: ActionsListProps) {
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [actionToDelete, setActionToDelete] = useState<SustainabilityAction | null>(null)
+export function ActionsList({
+  actions,
+  isLoading,
+  onEdit,
+  onDelete,
+}: ActionsListProps) {
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [actionToDelete, setActionToDelete] =
+    useState<SustainabilityAction | null>(null);
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
-  /**
-   * Handle action deletion with API call and error handling.
-   */
-  const handleDeleteAction = async (id: number) => {
-    const action = actions.find((a) => a.id === id)
-    if (!action) return
+  const handleDeleteAction = (id: number) => {
+    const action = actions.find((a) => a.id === id);
+    if (!action) return;
+    setActionToDelete(action);
+    setShowDeleteDialog(true);
+  };
 
-    setActionToDelete(action)
-    setShowDeleteDialog(true)
-  }
-
-  /**
-   * Confirm and execute action deletion.
-   */
   const confirmDelete = async () => {
-    if (!actionToDelete?.id) return
+    if (!actionToDelete?.id) return;
 
     try {
-      setDeletingId(actionToDelete.id)
-      await deleteAction(actionToDelete.id)
-      onDelete()
+      setDeletingId(actionToDelete.id);
+      await deleteAction(actionToDelete.id);
+
+      onDelete(actionToDelete.id);
+
       toast({
         title: "Action Deleted",
         description: `"${actionToDelete.action}" has been removed from your sustainability tracker.`,
-      })
+      });
     } catch (error) {
-      console.error("Failed to delete action:", error)
+      console.error("Failed to delete action:", error);
       toast({
         title: "Delete Failed",
         description: formatApiError(error),
         variant: "destructive",
-      })
+      });
     } finally {
-      setDeletingId(null)
-      setShowDeleteDialog(false)
-      setActionToDelete(null)
+      setDeletingId(null);
+      setShowDeleteDialog(false);
+      setActionToDelete(null);
     }
-  }
+  };
 
-  /**
-   * Cancel deletion and reset state.
-   */
   const cancelDelete = () => {
-    setShowDeleteDialog(false)
-    setActionToDelete(null)
-  }
+    setShowDeleteDialog(false);
+    setActionToDelete(null);
+    setDeletingId(null);
+  };
 
-  // Loading state with glassmorphism skeletons
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -256,23 +254,29 @@ export function ActionsList({ actions, isLoading, onEdit, onDelete }: ActionsLis
           <ActionItemSkeleton key={index} />
         ))}
       </div>
-    )
+    );
   }
 
-  // Empty state when no actions exist
-  if (actions.length === 0) {
-    return <EmptyState />
-  }
+  if (actions.length === 0) return <EmptyState />;
 
-  // Sort actions by date (most recent first) and render list
-  const sortedActions = [...actions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const sortedActions = [...actions].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   return (
     <>
       <div className="space-y-4">
         {sortedActions.map((action, index) => (
-          <div key={action.id} className="animate-slide-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-            <ActionItem action={action} onEdit={onEdit} onDelete={handleDeleteAction} />
+          <div
+            key={action.id}
+            className="animate-slide-in-up"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <ActionItem
+              action={action}
+              onEdit={onEdit}
+              onDelete={handleDeleteAction}
+            />
           </div>
         ))}
       </div>
@@ -283,12 +287,16 @@ export function ActionsList({ actions, isLoading, onEdit, onDelete }: ActionsLis
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Sustainability Action</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{actionToDelete?.action}"? This action cannot be undone and you will lose
-              the {actionToDelete?.points} points associated with it.
+              Are you sure you want to delete "{actionToDelete?.action}"? This
+              action cannot be undone and you will lose the{" "}
+              {actionToDelete?.points} points associated with it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelDelete} disabled={deletingId !== null}>
+            <AlertDialogCancel
+              onClick={cancelDelete}
+              disabled={deletingId !== null}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -296,11 +304,13 @@ export function ActionsList({ actions, isLoading, onEdit, onDelete }: ActionsLis
               disabled={deletingId !== null}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deletingId === actionToDelete?.id ? "Deleting..." : "Delete Action"}
+              {deletingId === actionToDelete?.id
+                ? "Deleting..."
+                : "Delete Action"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

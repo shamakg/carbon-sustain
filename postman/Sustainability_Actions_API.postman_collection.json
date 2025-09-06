@@ -1,0 +1,264 @@
+{
+  "info": {
+    "name": "Sustainability Actions API",
+    "description": "Complete API collection for testing the Django REST API endpoints for sustainability action tracking.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/health/",
+          "host": ["{{base_url}}"],
+          "path": ["health", ""]
+        },
+        "description": "Check if the API is running and healthy"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Actions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/actions/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", ""]
+        },
+        "description": "Retrieve all sustainability actions"
+      },
+      "response": []
+    },
+    {
+      "name": "Create New Action",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"Used reusable water bottle\",\n  \"date\": \"2024-01-15\",\n  \"points\": 5\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", ""]
+        },
+        "description": "Create a new sustainability action"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Single Action",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/actions/1/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", "1", ""]
+        },
+        "description": "Retrieve a specific sustainability action by ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Action (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"Used reusable water bottle for the whole day\",\n  \"date\": \"2024-01-15\",\n  \"points\": 10\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/1/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", "1", ""]
+        },
+        "description": "Update a sustainability action completely (all fields required)"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Action (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"points\": 15\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/1/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", "1", ""]
+        },
+        "description": "Partially update a sustainability action (only specified fields)"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Action",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/actions/1/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", "1", ""]
+        },
+        "description": "Delete a sustainability action by ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Create High-Impact Action",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"Installed solar panels\",\n  \"date\": \"2024-01-20\",\n  \"points\": 100\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", ""]
+        },
+        "description": "Example of creating a high-impact sustainability action"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Transportation Action",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"Biked to work instead of driving\",\n  \"date\": \"2024-01-21\",\n  \"points\": 25\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", ""]
+        },
+        "description": "Example of creating a transportation-related sustainability action"
+      },
+      "response": []
+    },
+    {
+      "name": "Bulk Actions Test",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"Composted organic waste\",\n  \"date\": \"2024-01-22\",\n  \"points\": 15\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/actions/",
+          "host": ["{{base_url}}"],
+          "path": ["actions", ""]
+        },
+        "description": "Test action for bulk operations and data validation"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["// Set timestamp for requests", "pm.globals.set('timestamp', new Date().toISOString());"]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Basic response validation",
+          "pm.test('Status code is successful', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+          "});",
+          "",
+          "// Response time validation",
+          "pm.test('Response time is less than 2000ms', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "// Content-Type validation for JSON responses",
+          "if (pm.response.code !== 204) {",
+          "    pm.test('Content-Type is application/json', function () {",
+          "        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

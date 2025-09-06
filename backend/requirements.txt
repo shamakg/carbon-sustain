@@ -1,0 +1,14 @@
+# Django REST API Requirements
+# Core framework and dependencies for the sustainability tracker backend
+
+# Django framework - main web framework
+Django==4.2.7
+
+# Django REST Framework - for building REST APIs
+djangorestframework==3.14.0
+
+# Django CORS Headers - enable CORS for frontend integration
+django-cors-headers==4.3.1
+
+# Additional useful packages for development
+python-decouple==3.8  # For environment variable management

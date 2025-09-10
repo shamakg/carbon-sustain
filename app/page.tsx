@@ -49,12 +49,12 @@ export default function SustainabilityTracker() {
   const loadActions = async () => {
     try {
       setIsLoading(true);
-      console.log("[v0] Loading actions from API...");
+      console.log("Loading actions from API...");
       const fetchedActions = await getAllActions();
-      console.log("[v0] Successfully loaded actions:", fetchedActions.length);
+      console.log("Successfully loaded actions:", fetchedActions.length);
       setActions(fetchedActions);
     } catch (error) {
-      console.error("[v0] Failed to load actions:", error);
+      console.error("Failed to load actions:", error);
       setActions([]);
       toast({
         title: "Error Loading Actions",
@@ -108,7 +108,7 @@ export default function SustainabilityTracker() {
    * Open the form for creating a new action.
    */
   const handleCreateAction = () => {
-    console.log("[v0] Opening create action form");
+    console.log("Opening create action form");
     setEditingAction(null);
     setShowForm(true);
   };

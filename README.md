@@ -245,6 +245,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Tailwind CSS** for the utility-first styling approach
 - **Lucide React** for the beautiful icon set
 - **shadcn/ui** for the component library foundation
+- **ChatGPT,V0** for coding assistance
 
 ## 📞 Support
 

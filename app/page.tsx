@@ -166,7 +166,7 @@ export default function SustainabilityTracker() {
 
               <Badge
                 variant="default"
-                className="bg-primary text-primary-foreground font-medium text-sm px-4 py-2 shadow-sm border-0"
+                className="bg-primary/50 text-primary-foreground font-medium text-sm px-4 py-2 shadow-sm border-0"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 {actions.length} Actions Tracked

@@ -420,10 +420,10 @@ CMD ["gunicorn", "sustainability_tracker.wsgi:application", "--bind", "0.0.0.0:8
 ### Postman Collection
 - File: Sustainability Actions API.postman_collection.json
 - Contains predefined requests for all endpoints:
-- Health check
-- List actions
-- Create new action
-- Retrieve, update, and delete actions
+   - Health check
+   - List actions
+   - Create new action
+   - Retrieve, update, and delete actions
 
 
 ## 🤝 Contributing

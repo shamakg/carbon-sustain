@@ -12,12 +12,6 @@
     "points": 25
   },
   {
-    "id": 4,
-    "action": "Using public transportation",
-    "date": "2025-09-10",
-    "points": 55
-  },
-  {
     "id": 5,
     "action": "Used reusable water bottle",
     "date": "2024-01-15",
@@ -88,5 +82,11 @@
     "action": "Recycling plastic bottles",
     "date": "2025-09-10",
     "points": 25
+  },
+  {
+    "id": 17,
+    "action": "Using public transportation",
+    "date": "2025-09-10",
+    "points": 30
   }
 ]

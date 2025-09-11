@@ -1,152 +1,127 @@
-/**
- * API service functions for communicating with the Django REST API.
- *
- * Centralized interface for all HTTP requests to the sustainability
- * actions backend API, with proper error handling and type safety.
- */
+import axios from "axios"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// ------------------- Config -------------------
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json", Accept: "application/json" },
+  timeout: 10000,
+})
+
+// ------------------- Types -------------------
 export interface SustainabilityAction {
-  id?: number;
-  action: string;
-  date: string; // ISO date string (YYYY-MM-DD)
-  points: number;
+  id?: number
+  action: string
+  date: string // YYYY-MM-DD
+  points: number
 }
 
 export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  count?: number;
-  message?: string;
-  error?: string;
-  errors?: Record<string, string[]>;
+  success: boolean
+  data?: T
+  count?: number
+  message?: string
+  error?: string
+  errors?: Record<string, string[]>
 }
 
 export class ApiError extends Error {
-  public status: number;
-  public response?: any;
+  public status: number
+  public response?: any
 
   constructor(message: string, status: number, response?: any) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.response = response;
+    super(message)
+    this.name = "ApiError"
+    this.status = status
+    this.response = response
   }
 }
 
-async function apiRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
+// ------------------- Axios Wrapper -------------------
+async function apiRequest<T>(
+  url: string,
+  options: { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; data?: any } = {}
+): Promise<ApiResponse<T>> {
+  const { method = "GET", data } = options
+
   try {
-    const defaultHeaders = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    };
-
-    const response = await fetch(`${API_BASE_URL}${url}`, config);
-
-    // Handle 204 No Content
-    if (response.status === 204) return {} as T;
-
-    let data: any;
-    try {
-      data = await response.json();
-    } catch {
-      throw new ApiError("Invalid JSON response from server", response.status);
-    }
-
-    if (!response.ok) {
-      const errorMessage = data?.error || data?.message || `HTTP ${response.status}`;
-      throw new ApiError(errorMessage, response.status, data);
-    }
-
-    return data;
+    const response = await apiClient.request<ApiResponse<T>>({
+      url,
+      method,
+      data,
+    })
+    return response.data
   } catch (err: unknown) {
-    if (err instanceof ApiError) throw err;
-
-    throw new ApiError(
-      err instanceof Error ? err.message : "Network error occurred",
-      0,
-      { originalError: err }
-    );
+    // Safe runtime narrowing
+    const error = err as any
+    if (error?.isAxiosError) {
+      const status = error.response?.status || 0
+      const responseData = error.response?.data
+      const message =
+        (responseData && (responseData.error || responseData.message)) ||
+        error.message ||
+        "Network error occurred"
+      throw new ApiError(message, status, responseData)
+    }
+    throw new ApiError(error instanceof Error ? error.message : "Unexpected error", 0)
   }
 }
 
-/** Get all actions */
+// ------------------- API Functions -------------------
 export async function getAllActions(): Promise<SustainabilityAction[]> {
-  const response = await apiRequest<ApiResponse<SustainabilityAction[]>>("/actions/");
-  return response.data || [];
+  const res = await apiRequest<SustainabilityAction[]>("/actions/")
+  return res.data || []
 }
 
-/** Get one action by ID */
 export async function getActionById(id: number): Promise<SustainabilityAction> {
-  const response = await apiRequest<ApiResponse<SustainabilityAction>>(`/actions/${id}/`);
-  if (!response.data) throw new ApiError("Action not found", 404);
-  return response.data;
+  const res = await apiRequest<SustainabilityAction>(`/actions/${id}/`)
+  if (!res.data) throw new ApiError("Action not found", 404)
+  return res.data
 }
 
-/** Create a new action */
 export async function createAction(actionData: Omit<SustainabilityAction, "id">): Promise<SustainabilityAction> {
-  const response = await apiRequest<ApiResponse<SustainabilityAction>>("/actions/", {
-    method: "POST",
-    body: JSON.stringify(actionData),
-  });
-  if (!response.data) throw new ApiError("Failed to create action", 500);
-  return response.data;
+  const res = await apiRequest<SustainabilityAction>("/actions/", { method: "POST", data: actionData })
+  if (!res.data) throw new ApiError("Failed to create action", 500)
+  return res.data
 }
 
-/** Update an action */
 export async function updateAction(
   id: number,
   actionData: Partial<SustainabilityAction>,
   partial = true
 ): Promise<SustainabilityAction> {
-  const method = partial ? "PATCH" : "PUT";
-  const response = await apiRequest<ApiResponse<SustainabilityAction>>(`/actions/${id}/`, {
-    method,
-    body: JSON.stringify(actionData),
-  });
-  if (!response.data) throw new ApiError("Failed to update action", 500);
-  return response.data;
+  const method = partial ? "PATCH" : "PUT"
+  const res = await apiRequest<SustainabilityAction>(`/actions/${id}/`, { method, data: actionData })
+  if (!res.data) throw new ApiError("Failed to update action", 500)
+  return res.data
 }
 
-/** Delete an action */
 export async function deleteAction(id: number): Promise<boolean> {
-  await apiRequest<ApiResponse<null>>(`/actions/${id}/`, { method: "DELETE" });
-  return true;
+  await apiRequest<null>(`/actions/${id}/`, { method: "DELETE" })
+  return true
 }
 
-/** API health check */
-export async function checkApiHealth(): Promise<{ status: string; statistics: { total_actions: number; total_points: number } }> {
-  const response = await apiRequest<ApiResponse<{ status: string; statistics: { total_actions: number; total_points: number } }>>("/health/");
-  if (!response.data) throw new ApiError("Invalid health check response", 500);
-  return response.data;
+export async function checkApiHealth(): Promise<{
+  status: string
+  statistics: { total_actions: number; total_points: number }
+}> {
+  const res = await apiRequest<{ status: string; statistics: { total_actions: number; total_points: number } }>("/health/")
+  if (!res.data) throw new ApiError("Invalid health check response", 500)
+  return res.data
 }
 
-/** Format API error for display */
+// ------------------- Utility -------------------
 export function formatApiError(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.response?.errors) {
-      const messages = Object.entries(error.response.errors)
-        .map(([field, msgs]) => {
-          // Assert msgs is string[]
-          const fieldMsgs = Array.isArray(msgs) ? msgs : [];
-          return `${field}: ${fieldMsgs.join(", ")}`;
-        })
-        .join("; ");
-      return `Validation error: ${messages}`;
+      return Object.entries(error.response.errors)
+        .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : ""}`)
+        .join("; ")
     }
-    return error.message || "An API error occurred";
+    return error.message
   }
 
-  if (error instanceof Error) return error.message;
-
-  return "An unexpected error occurred";
+  if (error instanceof Error) return error.message
+  return "Unexpected error occurred"
 }
